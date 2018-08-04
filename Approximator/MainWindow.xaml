@@ -1,0 +1,44 @@
+﻿<Window x:Class="Approximation.MainWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        xmlns:local="clr-namespace:Approximation"
+        mc:Ignorable="d"
+        Title="Approximator" Height="350" Width="525">
+    <Window.Resources>
+        <local:MainViewModel x:Key="MainViewModel" />
+    </Window.Resources>
+    <Grid Name="gMain" DataContext="{StaticResource MainViewModel}">
+        <Grid.RowDefinitions>
+            <RowDefinition Height="30px" />
+            <RowDefinition Height="40px" />
+            <RowDefinition Height="40px" />
+            <RowDefinition Height="800px"/>
+        </Grid.RowDefinitions>
+        <Menu></Menu>
+        <StackPanel Orientation="Horizontal" Grid.Row="1">
+            <ComboBox x:Name="cbFunctions" SelectedIndex="0" SelectedValue="{Binding SelectedFunction}"></ComboBox>
+            <Label Content="From:"></Label>
+            <TextBox x:Name="tbFrom" Width="40" Text="{Binding From}"></TextBox>
+            <Label Content="to:"></Label>
+            <TextBox x:Name="tbTo" Width="40" Text="{Binding To}"></TextBox>
+            <Label Content="Degree:"></Label>
+            <TextBox x:Name="tbDegree" Width="40" Text="{Binding Degree}"></TextBox>
+            <Button x:Name="bApproximate" Content="Approximate" Width="120" 
+                    Command="{Binding ApproximateCommand}" CommandParameter="{Binding}"></Button>
+        </StackPanel>
+        <StackPanel Orientation="Horizontal" Grid.Row="2">
+            <Label Content="Polynom:"></Label>
+            <TextBlock x:Name="tbPolynom" Text="{Binding Polynom}" Width="1200" TextWrapping="Wrap"></TextBlock>
+        </StackPanel>
+
+        <Border Grid.Row="3" Background="Transparent"
+                MouseDown="cElement_MouseDown" 
+                MouseUp="cElement_MouseUp"
+                MouseMove="cElement_MouseMove"
+                MouseWheel="Border_MouseWheel">
+            <Canvas x:Name="cElement" />
+        </Border>
+    </Grid>
+</Window>

@@ -1,0 +1,16 @@
+﻿  stdafx.cpp
+  polynom.cpp
+  gcd.cpp
+  DiscreteMathAlgorithms.cpp
+  matrix.cpp
+c:\users\alexey\documents\visual studio 2015\projects\discretemathcore\discretemathalgorithms\matrix.cpp(11): warning C4018: <: несоответствие типов со знаком и без знака
+c:\users\alexey\documents\visual studio 2015\projects\discretemathcore\discretemathalgorithms\matrix.cpp(21): warning C4018: <: несоответствие типов со знаком и без знака
+c:\users\alexey\documents\visual studio 2015\projects\discretemathcore\discretemathalgorithms\matrix.cpp(26): warning C4018: <: несоответствие типов со знаком и без знака
+c:\users\alexey\documents\visual studio 2015\projects\discretemathcore\discretemathalgorithms\matrix.cpp(45): warning C4018: <: несоответствие типов со знаком и без знака
+c:\users\alexey\documents\visual studio 2015\projects\discretemathcore\discretemathalgorithms\matrix.cpp(46): warning C4018: <: несоответствие типов со знаком и без знака
+c:\users\alexey\documents\visual studio 2015\projects\discretemathcore\discretemathalgorithms\matrix.cpp(71): warning C4018: <: несоответствие типов со знаком и без знака
+  Создание кода...
+  dllmain.cpp
+     Создается библиотека C:\Users\Alexey\Documents\Visual Studio 2015\Projects\DiscreteMathCore\Debug\DiscreteMathAlgorithms.lib и объект C:\Users\Alexey\Documents\Visual Studio 2015\Projects\DiscreteMathCore\Debug\DiscreteMathAlgorithms.exp
+  DiscreteMathAlgorithms.vcxproj -> C:\Users\Alexey\Documents\Visual Studio 2015\Projects\DiscreteMathCore\Debug\DiscreteMathAlgorithms.dll
+  DiscreteMathAlgorithms.vcxproj -> C:\Users\Alexey\Documents\Visual Studio 2015\Projects\DiscreteMathCore\Debug\DiscreteMathAlgorithms.pdb (Full PDB)

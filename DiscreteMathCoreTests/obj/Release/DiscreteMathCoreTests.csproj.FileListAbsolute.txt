@@ -1,0 +1,8 @@
+C:\Users\Alexey\Documents\Visual Studio 2015\Projects\DiscreteMathCore\DiscreteMathCoreTests\bin\Release\DiscreteMathCoreTests.dll
+C:\Users\Alexey\Documents\Visual Studio 2015\Projects\DiscreteMathCore\DiscreteMathCoreTests\bin\Release\DiscreteMathCoreTests.pdb
+C:\Users\Alexey\Documents\Visual Studio 2015\Projects\DiscreteMathCore\DiscreteMathCoreTests\bin\Release\DiscreteMathCore.dll
+C:\Users\Alexey\Documents\Visual Studio 2015\Projects\DiscreteMathCore\DiscreteMathCoreTests\bin\Release\Microsoft.VisualStudio.QualityTools.UnitTestFramework.dll
+C:\Users\Alexey\Documents\Visual Studio 2015\Projects\DiscreteMathCore\DiscreteMathCoreTests\bin\Release\DiscreteMathCore.pdb
+C:\Users\Alexey\Documents\Visual Studio 2015\Projects\DiscreteMathCore\DiscreteMathCoreTests\obj\Release\DiscreteMathCoreTests.csprojResolveAssemblyReference.cache
+C:\Users\Alexey\Documents\Visual Studio 2015\Projects\DiscreteMathCore\DiscreteMathCoreTests\obj\Release\DiscreteMathCoreTests.dll
+C:\Users\Alexey\Documents\Visual Studio 2015\Projects\DiscreteMathCore\DiscreteMathCoreTests\obj\Release\DiscreteMathCoreTests.pdb
