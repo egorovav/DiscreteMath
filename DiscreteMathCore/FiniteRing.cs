@@ -42,6 +42,22 @@ namespace DiscreteMathCore
             this.FMultTable = aMultOpp;
         }
 
+        private bool CheckZeroB()
+        {
+            for (long i = 0; i < this.Size; ++i)
+            {
+                var _0i = this.FAddTable[0, i];
+                if (!this.Equals(_0i, i))
+                    return false;
+
+                var _i0 = this.FAddTable[i, 0];
+                if (!this.Equals(_i0, i))
+                    return false;
+            }
+
+            return true;
+        }
+
         private string CheckZero()
         {
             for(long i = 0; i < this.Size; ++i)
@@ -74,7 +90,24 @@ namespace DiscreteMathCore
             return null;
         }
 
-        private string CheckAddAcc()
+        public bool CheckAddAccB()
+        {
+            for (var i = 0; i < this.Size; ++i)
+                for (var j = 0; j < this.Size; ++j)
+                    for (var k = 0; k < this.Size; ++k)
+                    {
+                        var _ab = this.FAddTable[i, j];
+                        var _ab_c = this.FAddTable[_ab, k];
+                        var _bc = this.FAddTable[j, k];
+                        var _a_bc = this.FAddTable[i, _bc];
+                        if (!this.Equals(_ab_c, _a_bc))
+                            return false;
+                    }
+
+            return true;
+        }
+
+        public string CheckAddAcc()
         {
             for (var i = 0; i < this.Size; ++i)
                 for (var j = 0; j < this.Size; ++j)
@@ -157,7 +190,26 @@ namespace DiscreteMathCore
             return null;
         }
 
-        public string CheckAdd()
+        public bool CheckAddAsGroupB()
+        {
+            // var _res = this.CheckZeroB();
+            // if (!_res)
+            //    return false;
+
+            var _res = this.CheckAddAccB();
+            if (!_res)
+                return false;
+
+            for (var i = 0; i < this.Size; ++i)
+            {
+                if (this.Opposite(i) < 0)
+                    return false;
+            }
+
+            return true;
+        }
+
+        public string CheckAddAsGroup()
         {
             var _res = this.CheckZero();
             if (_res != null)
@@ -167,15 +219,26 @@ namespace DiscreteMathCore
             if (_res != null)
                 return _res;
 
-            _res = this.CheckAddCom();
-            if (_res != null)
-                return _res;
-
             for (var i = 0; i < this.Size; ++i)
             {
                 if (this.Opposite(i) < 0)
                     return String.Format("The -{0} is absent.", i);
             }
+
+            return null;
+        }
+
+        public string CheckAdd()
+        {
+            var _res = CheckAddAsGroup();
+
+            if (_res != null)
+                return _res;
+
+            _res = this.CheckAddCom();
+
+            if (_res != null)
+                return _res;
 
             return null;
         }
