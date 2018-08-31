@@ -30,7 +30,6 @@ namespace DiscreteMathConsole
             var _mring = new MRing<Q, Rational>(_rational, _msize);
             var _pring = new Rx<Q, Rational>(_rational);
             var _mp = new MRing<Polynom<Q, Rational>, Rx<Q, Rational>>(_pring, _msize);
-            //var _pm = new Rx<Matrix<Q, Rational>, MRing<Q, Rational>>(_mring);
 
             var _a_vals = new Q[,]
                 {
@@ -59,16 +58,7 @@ namespace DiscreteMathConsole
             var _EX = new Matrix<Polynom<Q, Rational>, Rx<Q, Rational>>(_pring, _ex_vals);
             var _xi = (_EX + _mp.Opposite(_Ax)).Determinant;
 
-            var _xi_coeffs = _xi.Coeffs;
-
-            var _mcoeffs = new Matrix<Q, Rational>[_xi_coeffs.Length];
-            for (var i = 0; i < _xi_coeffs.Length; ++i)
-            {
-                _mcoeffs[i] = _mring.One;
-                _mcoeffs[i].Mult(_xi_coeffs[i]);
-            }
-
-            var _m_xi = new Polynom<Matrix<Q, Rational>, MRing<Q, Rational>>(_mring, _mcoeffs);
+            var _m_xi = _xi.GetMatrixPolynom(_msize);
             var _res = _m_xi.GetValue(A);
 
             Console.WriteLine(_res);

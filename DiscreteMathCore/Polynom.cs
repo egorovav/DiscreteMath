@@ -420,14 +420,29 @@ namespace DiscreteMathCore
             return _res;
         }
 
-        public T[] Coeffs
+        //public T[] Coeffs
+        //{
+        //    get
+        //    {
+        //        var _coeffs = new T[this.FCoeffs.Length];
+        //        Array.Copy(this.FCoeffs, _coeffs, this.FCoeffs.Length);
+        //        return _coeffs;
+        //    }
+        //}
+
+        public Polynom<Matrix<T, R>, MRing<T, R>> GetMatrixPolynom(int aMatrixSize)
         {
-            get
-            {
-                var _coeffs = new T[this.FCoeffs.Length];
-                Array.Copy(this.FCoeffs, _coeffs, this.FCoeffs.Length);
-                return _coeffs;
-            }
+
+                var _mring = new MRing<T, R>(this.FRing, aMatrixSize);
+                var _mcoeffs = new Matrix<T, R>[this.FCoeffs.Length];
+                for (var i = 0; i < this.FCoeffs.Length; ++i)
+                {
+                    _mcoeffs[i] = _mring.One;
+                    _mcoeffs[i].Mult(this.FCoeffs[i]);
+                }
+
+                var _m_xi = new Polynom<Matrix<T, R>, MRing<T, R>>(_mring, _mcoeffs);
+                return _m_xi;
         }
     }
 }

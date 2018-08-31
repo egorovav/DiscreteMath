@@ -46,16 +46,7 @@ namespace DiscreteMathCoreTests
             var _EX = new Matrix<Polynom<Q, Rational>, Rx<Q, Rational>>(_pring, _ex_vals);
             var _xi = (_EX + _mp.Opposite(_Ax)).Determinant;
 
-            var _xi_coeffs = _xi.Coeffs;
-
-            var _mcoeffs = new Matrix<Q, Rational>[_xi_coeffs.Length];
-            for (var i = 0; i < _xi_coeffs.Length; ++i)
-            {
-                _mcoeffs[i] = _mring.One;
-                _mcoeffs[i].Mult(_xi_coeffs[i]);
-            }
-
-            var _m_xi = new Polynom<Matrix<Q, Rational>, MRing<Q, Rational>>(_mring, _mcoeffs);
+            var _m_xi = _xi.GetMatrixPolynom(_msize);
             var _res = _m_xi.GetValue(A);
 
             Assert.AreEqual(_res, _mring.Zero);
