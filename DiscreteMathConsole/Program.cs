@@ -42,23 +42,24 @@ namespace DiscreteMathConsole
             var A = new Matrix<Q, Rational>(_rational, _a_vals);
 
 
-            var _ax_vals = new Polynom<Q, Rational>[_msize, _msize];
-            var _ex_vals = new Polynom<Q, Rational>[_msize, _msize];
-            for (var i = 0; i < _msize; ++i)
-                for (var j = 0; j < _msize; ++j)
-                {
-                    _ax_vals[i, j] = _pring.GetPolynomByElement(_a_vals[i, j]);
-                    if (i == j)
-                        _ex_vals[i, j] = new Polynom<Q, Rational>(_rational, new Q[] { 0, 1 });
-                    else
-                        _ex_vals[i, j] = _pring.GetPolynomByElement(0);
-                }
+            //var _ax_vals = new Polynom<Q, Rational>[_msize, _msize];
+            //var _ex_vals = new Polynom<Q, Rational>[_msize, _msize];
+            //for (var i = 0; i < _msize; ++i)
+            //    for (var j = 0; j < _msize; ++j)
+            //    {
+            //        _ax_vals[i, j] = _pring.GetPolynomByElement(_a_vals[i, j]);
+            //        if (i == j)
+            //            _ex_vals[i, j] = new Polynom<Q, Rational>(_rational, new Q[] { 0, 1 });
+            //        else
+            //            _ex_vals[i, j] = _pring.GetPolynomByElement(0);
+            //    }
 
-            var _Ax = new Matrix<Polynom<Q, Rational>, Rx<Q, Rational>>(_pring, _ax_vals);
-            var _EX = new Matrix<Polynom<Q, Rational>, Rx<Q, Rational>>(_pring, _ex_vals);
-            var _xi = (_EX + _mp.Opposite(_Ax)).Determinant;
+            //var _Ax = new Matrix<Polynom<Q, Rational>, Rx<Q, Rational>>(_pring, _ax_vals);
+            //var _EX = new Matrix<Polynom<Q, Rational>, Rx<Q, Rational>>(_pring, _ex_vals);
+            //var _xi = (_EX + _mp.Opposite(_Ax)).Determinant;
 
-            var _m_xi = _xi.GetMatrixPolynom(_msize);
+            var _m_xi = A.CharPolynom.GetMatrixPolynom(_msize);
+            Console.WriteLine(_m_xi);
             var _res = _m_xi.GetValue(A);
 
             Console.WriteLine(_res);

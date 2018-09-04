@@ -97,19 +97,6 @@ namespace DiscreteMathCore
             return _res;
         }
 
-        //private T MultColumnByRow(Matrix<T, R> A, int aRowNum, Matrix<T, R> B, int aColNum)
-        //{
-        //    if (A.ColumnCount != B.RowCount)
-        //        throw new ArgumentException();
-
-        //    var _res = A.FRing.Zero;
-        //    for (var i = 0; i < A.ColumnCount; ++i)
-        //    {
-        //        _res = A.FRing.Sum(_res, A.FRing.Prod(A.FValues[aRowNum, i], B.FValues[i, aColNum]));
-        //    }
-        //    return _res;
-        //}
-
         public static bool operator ==(Matrix<T, R> A, Matrix<T, R> B)
         {
             if ((object)A == null || (object)B == null)
@@ -281,7 +268,6 @@ namespace DiscreteMathCore
             get
             {
                 var D = this.Determinant;
-                //if (D.Equals(this.FRing.Zero))
                 if(this.FRing.Equals(D, this.FRing.Zero))
                     throw new DivideByZeroException(
                         String.Format("The matrix\n{0}isn't invertible on the ring {1}.", this, this.FRing));
@@ -480,6 +466,36 @@ namespace DiscreteMathCore
                 var _res = new T[this.RowCount, this.ColumnCount];
                 Array.Copy(this.FValues, _res, this.RowCount * this.ColumnCount);
                 return _res; 
+            }
+        }
+
+        public Polynom<T, R> CharPolynom
+        {
+            get
+            {
+                if (this.RowCount != this.ColumnCount)
+                    throw new ArgumentException();
+
+                var _msize = this.RowCount;
+                var _pring = new Rx<T, R>(this.FRing);
+                var _mp = new MRing<Polynom<T, R>, Rx<T, R>>(_pring, _msize);
+
+                var _ax_vals = new Polynom<T, R>[_msize, _msize];
+                var _ex_vals = new Polynom<T, R>[_msize, _msize];
+                for (var i = 0; i < _msize; ++i)
+                    for (var j = 0; j < _msize; ++j)
+                    {
+                        _ax_vals[i, j] = _pring.GetPolynomByElement(this.FValues[i, j]);
+                        if (i == j)
+                            _ex_vals[i, j] = new Polynom<T, R>(this.FRing, new T[] { this.FRing.Zero, this.FRing.One });
+                        else
+                            _ex_vals[i, j] = _pring.GetPolynomByElement(this.FRing.Zero);
+                    }
+
+                var _Ax = new Matrix<Polynom<T, R>, Rx<T, R>>(_pring, _ax_vals);
+                var _EX = new Matrix<Polynom<T, R>, Rx<T, R>>(_pring, _ex_vals);
+                var _xi = (_EX + _mp.Opposite(_Ax)).Determinant;
+                return _xi;
             }
         }
     }
