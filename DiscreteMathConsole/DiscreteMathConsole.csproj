@@ -45,6 +45,7 @@
   <ItemGroup>
     <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="ResultCalculator.cs" />
   </ItemGroup>
   <ItemGroup>
     <None Include="App.config" />
@@ -53,6 +54,10 @@
     <ProjectReference Include="..\Approximator\Approximator.csproj">
       <Project>{59B14A45-9D46-4964-9646-F611480A5797}</Project>
       <Name>Approximator</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\DiscreteMathCoreTests\DiscreteMathCoreTests.csproj">
+      <Project>{f8a7d67f-c010-497a-9ff4-a6826f27386f}</Project>
+      <Name>DiscreteMathCoreTests</Name>
     </ProjectReference>
     <ProjectReference Include="..\DiscreteMathCore\DiscreteMathCore.csproj">
       <Project>{4f21d9ca-3d50-4138-91dd-a7a901cd214a}</Project>

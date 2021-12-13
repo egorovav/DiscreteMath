@@ -19,6 +19,11 @@ using DivInputZn = System.Tuple<DiscreteMathCore.Polynom<long, DiscreteMathCore.
 using PolynomM = DiscreteMathCore.Polynom<DiscreteMathCore.Matrix<long, DiscreteMathCore.ZnRing>,
     DiscreteMathCore.MRing<long, DiscreteMathCore.ZnRing>>;
 
+using PolynomPxFx = DiscreteMathCore.Polynom<
+        DiscreteMathCore.Polynom<long, DiscreteMathCore.ZnRing>, 
+        DiscreteMathCore.PxFx<long, DiscreteMathCore.ZnRing>
+    >;
+
 namespace DiscreteMathCoreTests
 {
     [TestClass]
@@ -34,7 +39,7 @@ namespace DiscreteMathCoreTests
             var _res1 = new PolynomR(_rational, new Q[] { -1, 0, 1 });
             _input.Add(new Tuple<PolynomR, PolynomR, PolynomR>(_p11, _p12, _res1));
 
-            foreach(var t in _input)
+            foreach (var t in _input)
             {
                 Assert.AreEqual(t.Item3, t.Item1 * t.Item2, String.Format("Input: {0}, {1}", t.Item1, t.Item2));
             }
@@ -67,16 +72,16 @@ namespace DiscreteMathCoreTests
             var _num3 = new PolynomR(_rational, new Q[] { 4, 4, 5, -2, -1, -2, 1 });
             var _denum3 = new PolynomR(_rational, new Q[] { -2, 1 });
             var _quot3 = new PolynomR(_rational, new Q[] { -2, -3, -4, -1, 0, 1 });
-            var _rem3 = new PolynomR(_rational, -1); 
+            var _rem3 = new PolynomR(_rational, -1);
             _input.Add(new DivInputR(_num3, _denum3, _quot3, _rem3));
 
             var _num4 = new PolynomR(_rational, new Q[] { 2, -1, -3 });
             var _denum4 = new PolynomR(_rational, new Q[] { new Q(-11, 9), new Q(16, 9) });
-            var _quot4 = new PolynomR(_rational, new Q[] { new Q(-441, 256), new Q(-27, 16)});
+            var _quot4 = new PolynomR(_rational, new Q[] { new Q(-441, 256), new Q(-27, 16) });
             var _rem4 = new PolynomR(_rational, new Q[] { new Q(-27, 256) });
             _input.Add(new DivInputR(_num4, _denum4, _quot4, _rem4));
 
-            foreach(var t in _input)
+            foreach (var t in _input)
             {
                 List<PolynomR> _rem = new List<PolynomR>();
                 var _quot = t.Item1.Div(t.Item2, _rem);
@@ -172,7 +177,7 @@ namespace DiscreteMathCoreTests
             var _p22 = new PolynomR(_rational, new Q[] { 1, 0, 0, 0, 1 });
             _input.Add(new Tuple<PolynomR, PolynomR>(_p21, _p22));
 
-            foreach(var t in _input)
+            foreach (var t in _input)
             {
                 PolynomR a, b;
                 var _gcd = PolynomR.GetGcdEx(t.Item1, t.Item2, out a, out b);
@@ -187,6 +192,141 @@ namespace DiscreteMathCoreTests
             Polynom<long, ZnRing> a3, b3;
             var _gcd3 = Polynom<long, ZnRing>.GetGcdEx(_p31, _p32, out a3, out b3);
             Assert.AreEqual(_gcd3, _p31 * a3 + _p32 * b3, String.Format("Input: ({0}); ({1})", _p31, _p32));
+        }
+
+
+        [TestMethod]
+        public void PolynomGcd_Test()
+        {
+            var _rational = new Rational();
+            var _input = new List<Tuple<PolynomR, PolynomR, PolynomR>>();
+            var _p11 = new PolynomR(_rational, new Q[] { -5, 8, -3, -4, 2, 0, 1 });
+            var _p12 = new PolynomR(_rational, new Q[] { 1, -1, 1, 0, 0, 1 });
+            var _gcd1 = new PolynomR(_rational, new Q[] { 1, -1, 0, 1 });
+            _input.Add(new Tuple<PolynomR, PolynomR, PolynomR>(_p11, _p12, _gcd1));
+
+            var _p21 = new PolynomR(_rational, new Q[] { 1, 1, 0, 1, 0, 1 });
+            var _p22 = new PolynomR(_rational, new Q[] { 1, 0, 0, 0, 1 });
+            var _gcd2 = new PolynomR(_rational, new Q[] { 1 });
+            _input.Add(new Tuple<PolynomR, PolynomR, PolynomR>(_p21, _p22, _gcd2));
+
+            foreach (var t in _input)
+            {
+                Assert.AreEqual(t.Item3, PolynomR.GetGcd(t.Item1, t.Item2),
+                    String.Format("Input: ({0}); ({1})", t.Item1, t.Item2));
+            }
+
+            var _GF2 = new ZnRing(2);
+            var _p31 = new Polynom<long, ZnRing>(_GF2, new long[] { 1, 1, 0, 0, 0, 1 });
+            var _p32 = new Polynom<long, ZnRing>(_GF2, new long[] { 1, 0, 0, 1, 1 });
+            var _gcd3 = new Polynom<long, ZnRing>(_GF2, new long[] { 1 });
+
+            Assert.AreEqual(_gcd3, Polynom<long, ZnRing>.GetGcd(_p31, _p32),
+                String.Format("Input: ({0}); ({1})", _p31, _p32));
+        }
+
+        [TestMethod]
+        public void PolynomGcdPxFx_Test()
+        {
+            var _GF2 = new ZnRing(2);
+            var _mod = new Polynom<long, ZnRing>(_GF2, new long[] { 1, 1, 1 });
+            var _ring = new PxFx<long, ZnRing>(_GF2, _mod);
+            var _input = new List<Tuple<PolynomPxFx, PolynomPxFx, PolynomPxFx>>();
+
+            var _p110 = new Polynom<long, ZnRing>(_GF2, new long[] { 1, 1 });
+            var _p111 = new Polynom<long, ZnRing>(_GF2, new long[] { 0, 1 });
+            var _p11 = new PolynomPxFx(_ring, new Polynom<long, ZnRing>[] { _p110, _p111 });
+
+            var _p120 = new Polynom<long, ZnRing>(_GF2, new long[] { 1, 1 });
+            var _p121 = new Polynom<long, ZnRing>(_GF2, new long[] { 0, 1 });
+            var _p12 = new PolynomPxFx(_ring, new Polynom<long, ZnRing>[] { _p110, _p111 });
+            var _gcd1 = new PolynomPxFx(_ring, new Polynom<long, ZnRing>[] { _p110, _p111 });
+            _input.Add(new Tuple<PolynomPxFx, PolynomPxFx, PolynomPxFx>(_p11, _p12, _gcd1));
+
+            var _p210 = new Polynom<long, ZnRing>(_GF2, new long[] { 1, 1 });
+            var _p211 = new Polynom<long, ZnRing>(_GF2, new long[] { 0, 1 });
+            var _p21 = new PolynomPxFx(_ring, new Polynom<long, ZnRing>[] { _p210, _p211 });
+
+            var _p22 = _p21 * _p21;
+            var _gcd2 = new PolynomPxFx(_ring, new Polynom<long, ZnRing>[] { _p210, _p211 });
+            _input.Add(new Tuple<PolynomPxFx, PolynomPxFx, PolynomPxFx>(_p21, _p22, _gcd2));
+        }
+
+        [TestMethod]
+        public void PolynomDerivative_Test()
+        {
+            var _rational = new Rational();
+            var _input = new List<Tuple<PolynomR, PolynomR>>();
+            var _p1 = new PolynomR(_rational, new Q[] { 1, 0, 1 });
+            var _p2 = new PolynomR(_rational, new Q[] { 0, 2 });
+            _input.Add(new Tuple<PolynomR, PolynomR>(_p1.Derivative, _p2));
+
+            var _p11 = new PolynomR(_rational, new Q[] { 1, 0, 0, 1 });
+            var _p21 = new PolynomR(_rational, new Q[] { 0, 0, 3 });
+            _input.Add(new Tuple<PolynomR, PolynomR>(_p11.Derivative, _p21));
+
+            var _p = new PolynomR(_rational, new Q[] { 1 });
+            _input.Add(new Tuple<PolynomR, PolynomR>(_p.Derivative, new Rx<Q, Rational>(_rational).Zero));
+
+            foreach (var t in _input)
+            {
+                Assert.AreEqual(t.Item1, t.Item2, String.Format("Input: ({0}); ({1})", t.Item1, t.Item2));
+            }
+        }
+
+        [TestMethod]
+        public void Factorisation_Test()
+        {
+            var _ring = new ZnRing(5);
+            var _mod = new Polynom<long, ZnRing>(_ring, 5);
+            var _pfx = new PxFx<long, ZnRing>(_ring, _mod);
+
+            var _input = new List<Tuple<Polynom<long, ZnRing>, Polynom<long, ZnRing>>>();
+
+            foreach (var _pol in _pfx)
+            {
+                var _mults = _pol.Factorisation();
+                var _prod = new Polynom<long, ZnRing>(_ring, new long[] { 1 });
+                foreach (var _pp in _mults)
+                    _prod = _pfx.Prod(_prod, _pp);
+
+                _input.Add(new Tuple<Polynom<long, ZnRing>, Polynom<long, ZnRing>>(_pol, _prod));
+            }
+
+            foreach (var t in _input)
+            {
+                Assert.AreEqual(t.Item1, t.Item2, String.Format("Input: {0}", t.Item1));
+            }
+        }
+
+        [TestMethod]
+        public void FactorisationPxFx_Test()
+        {
+            var p = 3;
+            var _GF3 = new ZnRing(p);
+            var _ring = new PxFx<long, ZnRing>(
+                _GF3, new Polynom<long, ZnRing>(_GF3, new long[] { 2, 2, 1 }));
+            var _mod = new Polynom<Polynom<long, ZnRing>, PxFx<long, ZnRing>>(_ring,
+                new Polynom<long, ZnRing>[] {
+                    _ring.One, _ring.One, _ring.Zero, _ring.One,
+                    new Polynom<long, ZnRing>(_GF3, new long[] { 0, 1 })
+                });
+            var _pfx = new PxFx<Polynom<long, ZnRing>, PxFx<long, ZnRing>>(_ring, _mod);
+
+            foreach (var _pol in _pfx)
+            {
+                //var _mults = _pol.Factorisation();
+                var _mults = Polynom<long, ZnRing>.FactorisationPxFx(_pol);
+                var _prod = new Polynom<Polynom<long, ZnRing>, PxFx<long, ZnRing>>(
+                    _ring, new Polynom<long, ZnRing>[] { _ring.One });
+                foreach (var _mult in _mults)
+                {
+                    _prod *= _mult;
+                }
+
+                if (!_pol.Equals(_prod))
+                    Assert.AreEqual(_pol, _prod, String.Format("Input: {0}", _pol.TexString("y", false)));
+            }
         }
     }
 }

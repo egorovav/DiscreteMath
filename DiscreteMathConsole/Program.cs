@@ -8,6 +8,7 @@ using System.Runtime.InteropServices;
 using System.Text;
 using System.Threading.Tasks;
 using PolynomR = DiscreteMathCore.Polynom<DiscreteMathCore.Q, DiscreteMathCore.Rational>;
+using DiscreteMathCoreTests;
 
 namespace DiscreteMathConsole
 {
@@ -16,56 +17,126 @@ namespace DiscreteMathConsole
         const string _dllPath =@"\..\..\..\Debug\DiscreteMathAlgorithms.dll";
         static void Main(string[] args)
         {
-            HamiltonCayleyTest();
+            // int[] _inputData = new int[] { 3, 3, 7, 7 };
+            //int[] _inputData = new int[] { 1, 3, 4, 5 };
+            // int[] _inputData = new int[] { 6, 8, 8, 9 };
+             int[] _inputData = new int[] { 1, 5, 5, 5 };
+            // int[] _inputData = new int[] { 1, 3, 4, 6 };
+            //int[] _inputData = new int[] { 2, 3, 6, 6 };
+            //int[] _inputData = new int[] { 1, 4, 5, 6 };
+            ResultCalculator _resultCalculator = new ResultCalculator(_inputData, 24);
+            _resultCalculator.calculate();
 
-            Console.WriteLine("Finish.");
 
+            Console.WriteLine();
+
+            Console.WriteLine("Press any key to exit.");
             Console.ReadLine();
         }
 
-        private static void HamiltonCayleyTest()
+        private static MatrixUnitTest Test = new MatrixUnitTest();
+
+        private static void EnumerableTest()
         {
-            var _msize = 4;
-            var _rational = new Rational();
-            var _mring = new MRing<Q, Rational>(_rational, _msize);
-            var _pring = new Rx<Q, Rational>(_rational);
-            var _mp = new MRing<Polynom<Q, Rational>, Rx<Q, Rational>>(_pring, _msize);
+            var _ring = new ZnRing(3);
+            //foreach (var i in _ring)
+            //    Console.WriteLine(i); 
 
-            var _a_vals = new Q[,]
-                {
-                    { 4, 8, 3, 6 },
-                    { -1, -2, -1, -2 },
-                    { 3, 6, 4, 8 },
-                    { -2, -4, -2, -4 }
-                };
+            var _pfring = new PxFx<long, ZnRing>(_ring, new Polynom<long, ZnRing>(_ring, 3));
 
-            var A = new Matrix<Q, Rational>(_rational, _a_vals);
-
-
-            //var _ax_vals = new Polynom<Q, Rational>[_msize, _msize];
-            //var _ex_vals = new Polynom<Q, Rational>[_msize, _msize];
-            //for (var i = 0; i < _msize; ++i)
-            //    for (var j = 0; j < _msize; ++j)
-            //    {
-            //        _ax_vals[i, j] = _pring.GetPolynomByElement(_a_vals[i, j]);
-            //        if (i == j)
-            //            _ex_vals[i, j] = new Polynom<Q, Rational>(_rational, new Q[] { 0, 1 });
-            //        else
-            //            _ex_vals[i, j] = _pring.GetPolynomByElement(0);
-            //    }
-
-            //var _Ax = new Matrix<Polynom<Q, Rational>, Rx<Q, Rational>>(_pring, _ax_vals);
-            //var _EX = new Matrix<Polynom<Q, Rational>, Rx<Q, Rational>>(_pring, _ex_vals);
-            //var _xi = (_EX + _mp.Opposite(_Ax)).Determinant;
-
-            var _m_xi = A.CharPolynom.GetMatrixPolynom(_msize);
-            Console.WriteLine(_m_xi);
-            var _res = _m_xi.GetValue(A);
-
-            Console.WriteLine(_res);
+            //foreach (var _pol in _pfring)
+            //    Console.WriteLine(_pol);
         }
 
-        private static string ChequeVectorSpace(IRing<long> aRing)
+        private static void FactorisationTest1()
+        {
+            var _GF2 = new ZnRing(2); 
+            var _pring = new Rx<long, ZnRing>(_GF2);
+            var p = new Polynom<long, ZnRing>(_GF2, new long[] { 1, 1, 1, 1, 0, 1, 1 });
+
+            Console.WriteLine(p);
+
+            var _res = p.Factorisation();
+            var _prod = new Polynom<long, ZnRing>(_GF2, new long[] { 1 });
+            foreach (var _pp in _res)
+            {
+                _prod = _pring.Prod(_prod, _pp);
+                Console.WriteLine(_pp);
+            }
+
+            Console.WriteLine(_prod);
+        }
+
+        private static void FactorisationTest()
+        {
+            var p = 3;
+            var _degree = 3;
+            var _ring = new ZnRing(p);
+            var _mod = new Polynom<long, ZnRing>(_ring, _degree);
+            var _total = Math.Pow(p, _degree);
+            Console.WriteLine("Total - {0}", _total);
+            var _pfx = new PxFx<long, ZnRing>(_ring, _mod);
+
+            var _count = 0;
+            foreach (var _pol in _pfx)
+            {
+                var _mults = _pol.Factorisation();
+                var _prod = new Polynom<long, ZnRing>(_ring, new long[] { 1 });
+                foreach (var _pp in _mults)
+                    _prod *= _pp;
+
+                //if (!_pol.Equals(_prod))
+                if(_mults.Count == 1)
+                    Console.WriteLine("{0}:{1} - {2}", 
+                        _count, _pol.TexString("y", false), _prod.TexString("y", false));
+
+                _count++;
+                if (_count % 1000 == 0)
+                    Console.Write("\r{0}", _count);
+                
+            }
+
+            Console.WriteLine();
+        }
+
+        private static void FactorisationTest2()
+        {
+            var p = 3;
+            var _GF3 = new ZnRing(p);
+            var _ring = new PxFx<long, ZnRing>(
+                _GF3, new Polynom<long, ZnRing>(_GF3, new long[] { 2, 2, 1 }));
+            var _mod = new Polynom<Polynom<long, ZnRing>, PxFx<long, ZnRing>>(_ring, 
+                new Polynom<long, ZnRing>[] {
+                    _ring.One, _ring.One, _ring.Zero, _ring.One,
+                    new Polynom<long, ZnRing>(_GF3, new long[] { 0, 1 })
+                });
+            var _pfx = new PxFx<Polynom<long, ZnRing>, PxFx<long, ZnRing>>(_ring, _mod);
+            Console.WriteLine("Total - {0}", _pfx.Size);
+
+            var _count = 0;
+            foreach (var _pol in _pfx)
+            {
+                var _mults = _pol.Factorisation();
+                var _prod = new Polynom<Polynom<long, ZnRing>, PxFx<long, ZnRing>>(
+                    _ring, new Polynom<long, ZnRing>[] { _ring.One });
+                foreach (var _mult in _mults)
+                {
+                    _prod *= _mult;
+                }
+
+                if (!_pol.Equals(_prod))
+                    Console.WriteLine("{0}:{1} - {2}", 
+                        _count, _pol.TexString("y", false), _prod.TexString("y", false));
+
+                _count++;
+                if (_count % 1000 == 0)
+                    Console.Write("\r{0}", _count);
+            }
+
+            Console.WriteLine();
+        }
+
+        private static string ChequeVectorSpace(RingBase<long> aRing)
         {
             var _sb = new StringBuilder();
             string _res = null;
@@ -76,9 +147,6 @@ namespace DiscreteMathConsole
             var _size = _rowCount * _colCount;
 
             var _max = Math.Pow(_rowCount, _size);
-
-            //for(var i = 0; i < _rowCount; ++i)
-            //    _outerMult[i, 1] = i;
 
             var _temp = 0;
             var _outerMult = new int[_rowCount, _colCount];
@@ -118,7 +186,7 @@ namespace DiscreteMathConsole
             return _sb.ToString();
         }
 
-        private static string ChequeAx(int[,] OuterMult, IRing<long> aRing)
+        private static string ChequeAx(int[,] OuterMult, RingBase<long> aRing)
         {
             var _sb = new StringBuilder(OuterMultToString(OuterMult));
             _sb.AppendLine();
@@ -169,7 +237,7 @@ namespace DiscreteMathConsole
             return null;
         }
 
-        private static string ChequeAx2(int[,] OuterMult, IRing<long> aRing)
+        private static string ChequeAx2(int[,] OuterMult, RingBase<long> aRing)
         {
             var _rowCount = OuterMult.GetLength(0);
             var _colCount = OuterMult.GetLength(1);
@@ -191,7 +259,7 @@ namespace DiscreteMathConsole
             return null;
         }
 
-        private static string ChequeAx3(int[,] OuterMult, IRing<long> aRing)
+        private static string ChequeAx3(int[,] OuterMult, RingBase<long> aRing)
         {
             var _rowCount = OuterMult.GetLength(0);
             var _colCount = OuterMult.GetLength(1);
@@ -292,6 +360,37 @@ namespace DiscreteMathConsole
             var s = Matrix<Q, Rational>.SolveLs(_matrix);
             Console.WriteLine(s);
         }
+
+        //private List<Polynom<long, ZnRing>> BatlerTest(Polynom<long, ZnRing> fx, long p)
+        //{
+        //    var _res = new List<Polynom<long, ZnRing>>();
+        //    var _ring = new ZnRing(p);
+        //    var _pring = new Rx<long, ZnRing>(_ring);
+        //    var _derivative = fx.Derivative;
+        //    var _gcd = Polynom<long, ZnRing>.GetGcd(fx, _derivative);
+
+        //    if (_gcd.Degree > 0)
+        //    {
+        //        if (_derivative != _pring.Zero)
+        //        {
+        //            _res.Add(_gcd);
+        //            _res.Add(fx.Div(_gcd, null));
+        //            return _res;
+        //        }
+        //        else
+        //        {
+        //            var c = fx.Degree / p;
+        //            var _pol = new Polynom<long, ZnRing>(_ring, (int)c);
+        //            var _coeff = new List<long>();
+        //            for(var i = 0; i < c; i++)
+        //            {
+                        
+        //            }
+        //        }
+        //    }
+
+        //    return _res;
+        //}
 
         [DllImport(_dllPath)]
         static extern int get_gcd(int a, int b);

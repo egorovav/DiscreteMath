@@ -6,15 +6,24 @@ using System.Threading.Tasks;
 
 namespace DiscreteMathCore
 {
-    public class Matrix<T, R> where R: IRing<T>
+    public class Matrix<T, R> where R: RingBase<T>
     {
         private T[,] FValues;
         private R FRing;
 
         public Matrix(R aRing, T[,] aValues)
+            :this(aRing, aValues.GetLength(0), aValues.GetLength(1))
         {
-            this.FRing = aRing;
-            this.FValues = aValues;
+            for (var i = 0; i < aValues.GetLength(0); ++i)
+            {
+                for (var j = 0; j < aValues.GetLength(1); ++j)
+                {
+                    if (aValues[i, j] != null)
+                        this.FValues[i, j] = aValues[i, j];
+                    else
+                        this.FValues[i, j] = aRing.Zero;
+                }
+            }
         }
 
         public Matrix(R aRing, int aRowCount, int aColumnCount)
@@ -188,39 +197,175 @@ namespace DiscreteMathCore
             this.FIsInvalidAdjugate = true;
         }
 
-        private List<int[]> FPermutations;
+        public Matrix<T, R> Transponent
+        {
+            get
+            {
+                var _values = new T[this.ColumnCount, this.RowCount];
+                for(var i = 0; i < this.ColumnCount; i++)
+                {
+                    for(var j = 0; j < this.RowCount; j++)
+                    {
+                        _values[i, j] = this.FValues[j, i];
+                    }
+                }
+
+                return new Matrix<T, R>(this.FRing, _values);
+            }
+        }
 
         private bool FIsInvalidDeterminant = true;
         private T FDeterminant;
-        public T Determinant
+        public T Determinant 
         {
             get
             {
                 if (this.RowCount != this.ColumnCount)
                     throw new ArgumentException();
 
+
                 if(this.FIsInvalidDeterminant)
                 {
-                    var _minusOne = this.FRing.Opposite(this.FRing.One);
-                    var _res = this.FRing.Zero;
-                    if (this.FPermutations == null)
-                        this.FPermutations = Algorithms.GetPermutations(this.RowCount).ToList(); ;
-
-                    foreach(var _perm in this.FPermutations)
+                    if (this.FRing.IsField)
                     {
-                        var m = this.FRing.One;
-                        for(var j = 0; j < this.RowCount; ++j)
+                        var _matrix = new Matrix<T, R>(this.FRing, this.FValues);
+                        var _perm = _matrix.ConvertToDiag();
+                        var _res1 = this.FRing.One;
+                        for (var i = 0; i < _matrix.RowCount; i++)
                         {
-                            m = this.FRing.Prod(m, this.FValues[j, _perm[j]]);
+                            _res1 = this.FRing.Prod(_res1, _matrix.FValues[i, i]);
                         }
+
                         var _ic = Algorithms.GetInversionsCount(_perm);
-                        if(_ic % 2 == 1)
+                        var _even = _ic % 2 == 0 ? 1 : -1;
+                        if(_even < 0)
                         {
-                            m = this.FRing.Prod(m, _minusOne);
+                            _res1 = this.FRing.Opposite(_res1);
                         }
-                        _res = this.FRing.Sum(_res, m);
+
+                        this.FDeterminant = _res1;
                     }
-                    this.FDeterminant = _res;
+                    else
+                    {
+                        var _matrixStack = new Stack<Matrix<T, R>>();
+                        _matrixStack.Push(this);
+                        var _multStack = new Stack<T>();
+                        _multStack.Push(this.FRing.One);
+                        var _signStack = new Stack<int>();
+                        _signStack.Push(1);
+
+                        var _res = this.FRing.Zero;
+
+                        while (_matrixStack.Count > 0)
+                        {
+                            var _matrix = _matrixStack.Pop();
+                            var _mult = _multStack.Pop();
+                            var _sign = _signStack.Pop();
+
+                            if (_matrix.RowCount == 1)
+                            {
+                                var _addition = _matrix.FValues[0, 0];
+                                _addition = this.FRing.Prod(_addition, _mult);
+                                if (_sign < 0)
+                                {
+                                    _addition = this.FRing.Opposite(_addition);
+                                }
+
+                                _res = this.FRing.Sum(_res, _addition);
+
+                                continue;
+                            }
+
+                            var _maxZeroInRow = 0;
+                            var _rowIndex = 0;
+                            for (var i = 0; i < _matrix.RowCount; i++)
+                            {
+                                var _zeroCount = 0;
+                                for (var j = 0; j < _matrix.ColumnCount; j++)
+                                {
+                                    if (_matrix.FRing.Equals(_matrix.FValues[i, j], _matrix.FRing.Zero))
+                                    {
+                                        _zeroCount++;
+                                    }
+                                }
+
+                                if (_zeroCount > _maxZeroInRow)
+                                {
+                                    _maxZeroInRow = _zeroCount;
+                                    _rowIndex = i;
+                                }
+                            }
+
+                            var _maxZeroInColumn = 0;
+                            var _colIndex = 0;
+                            for (var i = 0; i < _matrix.ColumnCount; i++)
+                            {
+                                var _zeroCount = 0;
+                                for (var j = 0; j < _matrix.RowCount; j++)
+                                {
+                                    if (_matrix.FRing.Equals(_matrix.FValues[j, i], _matrix.FRing.Zero))
+                                    {
+                                        _zeroCount++;
+                                    }
+                                }
+
+                                if (_zeroCount > _maxZeroInColumn)
+                                {
+                                    _maxZeroInColumn = _zeroCount;
+                                    _colIndex = i;
+                                }
+                            }
+
+                            if (_maxZeroInRow + _maxZeroInColumn == 0)
+                            {
+                                var _addition = _matrix.GetDeterminant();
+                                _addition = this.FRing.Prod(_addition, _mult);
+                                if (_sign < 0)
+                                {
+                                    _addition = this.FRing.Opposite(_addition);
+                                }
+
+                                _res = this.FRing.Sum(_res, _addition);
+                            }
+                            else
+                            {
+                                if (_maxZeroInRow >= _maxZeroInColumn)
+                                {
+                                    for (var i = 0; i < _matrix.ColumnCount; i++)
+                                    {
+                                        var _item = _matrix.FValues[_rowIndex, i];
+                                        if (!this.FRing.Equals(_item, this.FRing.Zero))
+                                        {
+                                            var _minor = _matrix.GetMinor(_rowIndex, i);
+                                            var _even = (_rowIndex + i) % 2 == 0 ? 1 : -1;
+
+                                            _matrixStack.Push(_minor);
+                                            _multStack.Push(this.FRing.Prod(_item, _mult));
+                                            _signStack.Push(_sign * _even);
+                                        }
+                                    }
+                                }
+                                else
+                                {
+                                    for (var i = 0; i < _matrix.RowCount; i++)
+                                    {
+                                        var _item = _matrix.FValues[i, _colIndex];
+                                        if (!this.FRing.Equals(_item, this.FRing.Zero))
+                                        {
+                                            var _minor = _matrix.GetMinor(i, _colIndex);
+                                            var _even = (_colIndex + i) % 2 == 0 ? 1 : -1;
+
+                                            _matrixStack.Push(_minor);
+                                            _multStack.Push(this.FRing.Prod(_item, _mult));
+                                            _signStack.Push(_sign * _even);
+                                        }
+                                    }
+                                }
+                            }
+                        }
+
+                        this.FDeterminant = _res;
+                    }
                     this.FIsInvalidDeterminant = false;
                 }
 
@@ -228,9 +373,69 @@ namespace DiscreteMathCore
             }
         }
 
+        public Matrix<T, R> GetMinor(int aRowIndex, int aColumnIndex)
+        {
+            var _subValues = new T[this.RowCount - 1, this.ColumnCount - 1];
+            var _listRows = new List<List<T>>();
+            for (var j = 0; j < this.RowCount; j++)
+            {
+                if (j == aRowIndex)
+                {
+                    continue;
+                }
+
+                var _row = new List<T>();
+                for (var k = 0; k < this.ColumnCount; k++)
+                {
+                    if (k == aColumnIndex)
+                    {
+                        continue;
+                    }
+
+                    _row.Add(this.FValues[j, k]);
+                }
+                _listRows.Add(_row);
+            }
+
+            for (var j = 0; j < _listRows.Count; j++)
+            {
+                var _row = _listRows[j];
+                for (var k = 0; k < _row.Count; k++)
+                {
+                    _subValues[j, k] = _row[k];
+                }
+            }
+
+            return new Matrix<T, R>(this.FRing, _subValues);
+        }
+
+        private T GetDeterminant()
+        {
+            var _minusOne = this.FRing.Opposite(this.FRing.One);
+            var _res = this.FRing.Zero;
+            var _permutationIterator = new PermutationIterator(this.RowCount);
+            while (_permutationIterator.MoveNext())
+            {
+                var _perm = _permutationIterator.Current;
+                var m = this.FRing.One;
+                for (var j = 0; j < this.RowCount; ++j)
+                {
+                    m = this.FRing.Prod(m, this.FValues[j, _perm[j]]);
+                }
+                var _ic = Algorithms.GetInversionsCount(_perm.ToArray());
+                if (_ic % 2 == 1)
+                {
+                    m = this.FRing.Prod(m, _minusOne);
+                }
+                _res = this.FRing.Sum(_res, m);
+            }
+
+            return _res;
+        }
+
         private bool FIsInvalidAdjugate = true;
         private Matrix<T, R> FAdjugate;
-        public Matrix<T, R> Adjucate
+        public Matrix<T, R> Adjugate
         {
             get
             {
@@ -286,10 +491,8 @@ namespace DiscreteMathCore
                     throw new DivideByZeroException(_sb.ToString());
                 }
                
-
-
                 var _copy = new Matrix<T, R>(this);
-                var _adj = _copy.Adjucate;
+                var _adj = _copy.Adjugate;
                 _adj.Mult(_dr);
                 return _adj;
 
@@ -307,7 +510,7 @@ namespace DiscreteMathCore
             }
         }
 
-        public void ConvertToDiag()
+        public int[] ConvertToDiag()
         {
             var _temp = this.FRing.Zero;
             var _colNum = -1;
@@ -341,10 +544,10 @@ namespace DiscreteMathCore
 
                 var _ii = this.FValues[_rowNum, _colNum];
                 var _iir = this.FRing.Reverse(_ii);
-                this.FValues[_rowNum, _colNum] = this.FRing.One;
+                var _row = new T[this.ColumnCount];
                 for (int j = _colNum + 1; j < this.ColumnCount; ++j)
                 {
-                    this.FValues[_rowNum, j] = this.FRing.Prod(_iir, this.FValues[_rowNum, j]);
+                    _row[j] = this.FRing.Prod(_iir, this.FValues[_rowNum, j]);
                 }
 
                 for (int j = _rowNum + 1; j < this.RowCount; ++j)
@@ -353,12 +556,14 @@ namespace DiscreteMathCore
                     this.FValues[j, _colNum] = this.FRing.Zero;
                     for (int k = _colNum + 1; k < this.ColumnCount; ++k)
                     {
-                        _temp = this.FRing.Opposite(this.FRing.Prod(this.FValues[_rowNum, k], _ji));
+                        _temp = this.FRing.Opposite(this.FRing.Prod(_row[k], _ji));
                         this.FValues[j, k] = this.FRing.Sum(this.FValues[j, k], _temp);
                     }
                 }
                 _rowNum++;
             }
+
+            return _vars;
         }
 
         public void ConvertToE()
@@ -366,7 +571,7 @@ namespace DiscreteMathCore
             this.ConvertToDiag();
 
             var _temp = this.FRing.Zero;
-            for (int i = this.RowCount - 1; i > 0; --i)
+            for (int i = this.RowCount - 1; i >= 0; --i)
             {
                 var _colNum = -1;
                 for (int j = 0; j < this.ColumnCount; ++j)
@@ -381,9 +586,19 @@ namespace DiscreteMathCore
                 if (_colNum < 0)
                     continue;
 
+                var _noZero = this.FValues[i, _colNum];
+                var _iir = this.FRing.Reverse(_noZero);
+                this.FValues[i, _colNum] = this.FRing.One;
+
+                for (var k = _colNum + 1; k < this.ColumnCount; k++)
+                {
+                    this.FValues[i, k] = this.FRing.Prod(this.FValues[i, k], _iir);
+                }
+
                 for (int j = 0; j < i; ++j)
                 {
                     var _ji = this.FValues[j, _colNum];
+
                     this.FValues[j, _colNum] = this.FRing.Zero;
                     for (int k = _colNum + 1; k < this.ColumnCount; ++k)
                     {
@@ -417,7 +632,6 @@ namespace DiscreteMathCore
                 }
 
                 if (_nonZeroIndex == aLsMatrix.ColumnCount - 1)
-                    //return new MRing<T, R>(aLsMatrix.FRing, 1).Zero;
                     return null;
 
                 if (_nonZeroIndex < 0)
@@ -446,6 +660,8 @@ namespace DiscreteMathCore
                 _boundVarIndexes.Add(_nonZeroIndex);
             }
 
+            if (_res == null)
+                _res = new Matrix<T, R>(aLsMatrix.FRing, aLsMatrix.ColumnCount - 1, _freeVarsCnt + 1);
             var _colNum = 0;
             for (int i = 0; i < aLsMatrix.ColumnCount - 1; ++i)
             {

@@ -6,7 +6,7 @@ using System.Threading.Tasks;
 
 namespace DiscreteMathCore
 {
-    public class Polynom<T, R> where R : IRing<T>
+    public class Polynom<T, R> where R : RingBase<T>
     {
         private R FRing;
         private T[] FCoeffs;
@@ -14,12 +14,25 @@ namespace DiscreteMathCore
         public Polynom(R aRing, IEnumerable<T> aCoeffs)
         {
             this.FRing = aRing;
-            this.FCoeffs = aCoeffs.ToArray();
-            for (int i = 0; i <= this.Degree; ++i)
+
+            var _arr = aCoeffs.ToArray();
+
+            var _coeffs = new List<T>();
+            for(var i = _arr.Length - 1; i >= 0; --i)
             {
-                if (this.FCoeffs[i] == null)
-                    this.FCoeffs[i] = aRing.Zero;
+                if (_arr[i] == null)
+                    _arr[i] = aRing.Zero;
+
+                if(_arr[i].Equals(aRing.Zero) && _coeffs.Count == 0)
+                {
+                    continue;
+                }
+
+                _coeffs.Add(_arr[i]);
             }
+
+            _coeffs.Reverse();
+            this.FCoeffs = _coeffs.ToArray();
         }
 
         public Polynom(Polynom<T, R> aPolynom)
@@ -57,10 +70,25 @@ namespace DiscreteMathCore
 
         public void Mult(T a)
         {
-            for (int i = 0; i <= this.Degree; ++i)
+            //for (int i = 0; i <= this.Degree; ++i)
+            //{
+            //    this.FCoeffs[i] = this.FRing.Prod(this.FCoeffs[i], a);
+            //}
+
+            var _index = this.Degree;
+            while (_index >= 0 && this.FRing.Equals(this.FCoeffs[_index], this.FRing.Zero))
             {
-                this.FCoeffs[i] = this.FRing.Prod(this.FCoeffs[i], a);
+                _index--;
             }
+
+            var _coeffs = new T[_index + 1];
+
+            for (int i = 0; i <= _index; ++i)
+            {
+                _coeffs[i] = this.FRing.Prod(this.FCoeffs[i], a);
+            }
+
+            this.FCoeffs = _coeffs;
         }
 
         public static Polynom<T, R> operator +(Polynom<T, R> Ax, Polynom<T, R> Bx)
@@ -209,6 +237,12 @@ namespace DiscreteMathCore
                 aRemainder.Add(_rem);
             }
 
+            if(quot.Degree < deg_quot)
+            {
+                var _shift = new Polynom<T, R>(this.FRing, deg_quot - quot.Degree);
+                quot = quot * _shift;
+            }
+
             return quot;
         }
 
@@ -275,6 +309,9 @@ namespace DiscreteMathCore
 
         public override string ToString()
         {
+            if (this.Degree < 0)
+                return "0";
+
             var _str = String.Join<T>(", ", this.FCoeffs);
             if (this.FCoeffs == null)
                 _str = this.FRing.Zero.ToString();
@@ -303,7 +340,8 @@ namespace DiscreteMathCore
                     {
                         if (this.FRing.Equals(c, this.FRing.One))
                             _cs = String.Empty;
-                        else if (this.FRing.Equals(c, this.FRing.Opposite(this.FRing.One)))
+                        else if (this.FRing.Size < 0 &&
+                            this.FRing.Equals(c, this.FRing.Opposite(this.FRing.One)))
                             _cs = "-";
                     }
 
@@ -329,15 +367,68 @@ namespace DiscreteMathCore
             return TexString("x", false);
         }
 
-        public static Polynom<T, R> GetGcdEx(Polynom<T, R> a, Polynom<T, R> b,
-           out Polynom<T, R> u, out Polynom<T, R> v)
+        public static Polynom<T, R> GetGcd(Polynom<T, R> a, Polynom<T, R> b)
         {
-            var _zero = new Polynom<T, R>(a.FRing, -1);
-            var _one = new Polynom<T, R>(a.FRing, 0);
+            var _alocal = new Polynom<T, R>(a);
+
+            var _zero = new Polynom<T, R>(_alocal.FRing, -1);
+            var _one = new Polynom<T, R>(_alocal.FRing, 0);
 
             var gcd = _zero;
 
-            if (a.Degree < 0)
+            if (_alocal.Degree < 0)
+            {
+                gcd = b;
+            }
+            else if (b.Degree < 0)
+            {
+                gcd = _alocal;
+            }
+            else
+            {
+                var r1 = b;
+
+                var r2 = new List<Polynom<T, R>>();
+                var _quot = _alocal.Div(b, r2);
+
+                gcd = b;
+
+                var q = _zero;
+
+                var temp = new List<Polynom<T, R>>();
+                var temp1 = _zero;
+
+                while (r2.Last().Degree >= 0)
+                {
+                    gcd = r2.Last();
+                    q = r1.Div(r2.Last(), temp);
+                    //r1 = r2.Last();
+                    r1 = gcd;
+                    r2 = temp;
+                }
+            }
+
+            var _major = gcd.FCoeffs[gcd.Degree];
+            if (!_alocal.FRing.Equals(_major, _alocal.FRing.One))
+            {
+                var _major_1 = _alocal.FRing.Reverse(_major);
+                gcd.Mult(_major_1);
+            }
+
+            return gcd;
+        }
+
+        public static Polynom<T, R> GetGcdEx(Polynom<T, R> a, Polynom<T, R> b,
+           out Polynom<T, R> u, out Polynom<T, R> v)
+        {
+            var _alocal = new Polynom<T, R>(a);
+
+            var _zero = new Polynom<T, R>(_alocal.FRing, -1);
+            var _one = new Polynom<T, R>(_alocal.FRing, 0);
+
+            var gcd = _zero;
+
+            if (_alocal.Degree < 0)
             {
                 u = _zero;
                 v = (b.Degree < 0 ? _zero : _one);
@@ -346,15 +437,17 @@ namespace DiscreteMathCore
             else if (b.Degree < 0)
             {
                 v = _zero;
-                u = (a.Degree < 0 ? _zero : _one);
-                gcd = a;
+                u = (_alocal.Degree < 0 ? _zero : _one);
+                gcd = _alocal;
             }
             else
             {
                 var r1 = b;
 
                 var r2 = new List<Polynom<T, R>>();
-                var _quot = a.Div(b, r2);
+                var _quot = _alocal.Div(b, r2);
+
+                gcd = b;
 
                 var u1 = _one;
                 var u2 = _zero;
@@ -372,8 +465,10 @@ namespace DiscreteMathCore
 
                 while (r2.Last().Degree >= 0)
                 {
+                    gcd = r2.Last();
                     q = r1.Div(r2.Last(), temp);
-                    r1 = r2.Last();
+                    //r1 = r2.Last();
+                    r1 = gcd;
                     r2 = temp;
                     temp1 = u1;
                     u1 = u2 - u1 * q;
@@ -385,22 +480,20 @@ namespace DiscreteMathCore
 
                 u = u2;
                 v = v2;
-                //gcd = r1;
-                gcd = r2[r2.Count - 3];
             }
 
             var _major = gcd.FCoeffs[gcd.Degree];
-            if (!a.FRing.Equals(_major, a.FRing.One))
+            if (!_alocal.FRing.Equals(_major, _alocal.FRing.One))
             {
-                var _major_1 = a.FRing.Reverse(_major);
+                var _major_1 = _alocal.FRing.Reverse(_major);
                 gcd.Mult(_major_1);
             }
 
             var _sum = u * a + v * b;
             _major = _sum.FCoeffs[_sum.Degree];
-            if(!a.FRing.Equals(_major, a.FRing.One))
+            if(!_alocal.FRing.Equals(_major, _alocal.FRing.One))
             {
-                var _major_1 = a.FRing.Reverse(_major);
+                var _major_1 = _alocal.FRing.Reverse(_major);
                 u.Mult(_major_1);
                 v.Mult(_major_1);
             }
@@ -420,7 +513,7 @@ namespace DiscreteMathCore
             return _res;
         }
 
-        public Polynom<Matrix<T, R>, MRing<T, R>> GetMatrixPolynom(int aMatrixSize)
+        public Polynom<Matrix<T, R>, MRing<T, R>>  GetMatrixPolynom(int aMatrixSize)
         {
 
                 var _mring = new MRing<T, R>(this.FRing, aMatrixSize);
@@ -433,6 +526,182 @@ namespace DiscreteMathCore
 
                 var _m_xi = new Polynom<Matrix<T, R>, MRing<T, R>>(_mring, _mcoeffs);
                 return _m_xi;
+        }
+
+        public Polynom<T, R> Derivative
+        {
+            get
+            {
+                if (this.Degree == 0)
+                    return new Rx<T, R>(this.FRing).Zero;
+
+                var _coeffs = new List<T>();
+                for(var i = this.Degree - 1; i >= 0; i--)
+                {
+                    var _coeff = this.FRing.Mult(this.FCoeffs[i + 1], i + 1);
+                    if(_coeffs.Count == 0 && _coeff.Equals(this.FRing.Zero))
+                    {
+                        continue;
+                    }
+                    else
+                    {
+                        _coeffs.Add(_coeff);
+                    }
+                }
+                _coeffs.Reverse();
+                var _derivative = new Polynom<T, R>(this.FRing, _coeffs);
+                return _derivative;
+            }
+        }
+
+        public static List<Polynom<Polynom<long, ZnRing>, PxFx<long, ZnRing>>>
+            FactorisationPxFx(Polynom<Polynom<long, ZnRing>, PxFx<long, ZnRing>> aPolynom)
+        {
+            var _finiteRing = aPolynom.FRing.Ring;
+            var _coeffs = new long[aPolynom.Degree + 1];
+            for(var i = 0; i <= aPolynom.Degree; i++)
+            {
+                _coeffs[i] = aPolynom.FRing.Values.IndexOf(aPolynom.FCoeffs[i]);
+            }
+
+            var _polynom = new Polynom<long, FiniteRing>(_finiteRing, _coeffs);
+            var _res = _polynom.Factorisation();
+
+            var _res1 = new List<Polynom<Polynom<long, ZnRing>, PxFx<long, ZnRing>>>();
+            foreach(var _pol in _res)
+            {
+                var _cs = new Polynom<long, ZnRing>[_pol.Degree + 1];
+                for(var i = 0; i <= _pol.Degree; i++)
+                {
+                    _cs[i] = aPolynom.FRing.Values[(int)_pol.FCoeffs[i]];
+                }
+                _res1.Add(new Polynom<Polynom<long, ZnRing>, PxFx<long, ZnRing>>(aPolynom.FRing, _cs));
+            }
+
+            return _res1;
+        }
+
+        private List<Polynom<T, R>> Factorisation(Polynom<T, R> aPolynom)
+        {
+            if(!(aPolynom.FRing is IEnumerable<T>))
+            {
+                throw new ArgumentException("Polinom's ring mast be enumerable.");
+            }
+
+            var p = (int)aPolynom.FRing.Size;
+            var _res = new List<Polynom<T, R>>();
+            if (aPolynom.Degree < 2)
+                return _res;
+            var _pring = new Rx<T, R>(aPolynom.FRing);
+            var _derivative = aPolynom.Derivative;
+            var _gcd = Polynom<T, R>.GetGcd(aPolynom, _derivative);
+
+            if (_gcd.Degree > 0)
+            {
+                if (_derivative != _pring.Zero)
+                {
+                    _res.Add(_gcd);
+                    _res.Add(aPolynom.Div(_gcd, null));
+                }
+                else
+                {
+                    p = (int)aPolynom.FRing.SimpleSubfieldSize;
+
+                    var c = aPolynom.Degree / p;
+                    var _pol = new Polynom<T, R>(aPolynom.FRing, c);
+                    for (var i = 0; i <= c; i++)
+                    {
+                        _pol.FCoeffs[i] = aPolynom.FRing.Pow(
+                            aPolynom.FCoeffs[p * i], this.FRing.Size / p);
+                    }
+
+                    for (var i = 0; i < p; i++)
+                        _res.Add(new Polynom<T, R>(_pol));
+                }
+
+                return _res;
+            }
+
+            var _aij_vals = new T[aPolynom.Degree, aPolynom.Degree];
+            for(var i = 1; i < aPolynom.Degree; i++)
+            {
+                var _pol = new Polynom<T, R>(aPolynom.FRing, i * p);
+                _pol.FCoeffs[i] = aPolynom.FRing.Opposite(aPolynom.FRing.One);
+                var _rem = new List<Polynom<T, R>>();
+                _pol.Div(aPolynom, _rem);
+                var _ai = _rem.Last();
+
+                for (var j = 0; j <= _ai.Degree; j++)
+                    _aij_vals[j, i - 1] = _ai.FCoeffs[j];
+            }
+
+            var _aij = new Matrix<T, R>(aPolynom.FRing, _aij_vals);
+
+            var _matrix = Matrix<T, R>.SolveLs(_aij);
+            var _solvation = new T[_matrix.RowCount + 1];
+            _solvation[0] = aPolynom.FRing.Zero;
+            bool IsResEmpty = true;
+            var _matrixValues = _matrix.Values;
+            for (var i = 0; i < _matrix.RowCount; i++)
+            {
+                if (_solvation[i + 1] == null)
+                    _solvation[i + 1] = aPolynom.FRing.Zero;
+
+                for(var j = 0; j < _matrix.ColumnCount; j++)
+                    _solvation[i + 1] = aPolynom.FRing.Sum(_solvation[i + 1], _matrixValues[i, j]);
+
+                IsResEmpty = _solvation[i + 1].Equals(aPolynom.FRing.Zero);
+            }
+            if (!IsResEmpty)
+            {
+                var _pp = new Polynom<T, R>(aPolynom.FRing, _solvation);
+
+                var _gcd1 = _pring.One;
+                var _enumerable = (IEnumerable<T>)this.FRing;
+
+                foreach (var _item in _enumerable)
+                {
+                    var _ppp = new Polynom<T, R>(_pp);
+                    _ppp.FCoeffs[0] = _ppp.FRing.Sum(_item, _ppp.FCoeffs[0]);
+                    _gcd1 = Polynom<T, R>.GetGcd(aPolynom, _ppp);
+                    if(!_gcd1.Equals(_pring.One))
+                    {
+                        _res.Add(_gcd1);
+                        var _rem = new List<Polynom<T, R>>();
+                        var _quot = aPolynom.Div(_gcd1, _rem);
+                        _res.Add(_quot);
+                        break;
+                    }
+                }
+            }
+            return _res;
+        }
+
+        public List<Polynom<T, R>> Factorisation()
+        {
+            var _res = new List<Polynom<T, R>>();
+
+            var _stack = new Stack<Polynom<T, R>>();
+            _stack.Push(this);
+
+            while(_stack.Count > 0)
+            {
+                var _polynom = _stack.Pop();
+                var _multipliers = this.Factorisation(_polynom);
+                if (_multipliers.Count == 0)
+                {
+                    _res.Add(_polynom);
+                }
+                else
+                {
+                    foreach (var _mult in _multipliers)
+                    {
+                        _stack.Push(_mult);
+                    }
+                }
+            }
+
+            return _res;
         }
     }
 }

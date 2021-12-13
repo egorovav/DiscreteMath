@@ -6,7 +6,7 @@ using System.Threading.Tasks;
 
 namespace DiscreteMathCore
 {
-    public class MRing<T, R> : IRing<Matrix<T, R>> where R : IRing<T>
+    public class MRing<T, R> : RingBase<Matrix<T, R>> where R : RingBase<T>
     {
         private R FRing;
         private int FSize;
@@ -17,7 +17,7 @@ namespace DiscreteMathCore
             this.FSize = aSize;
         }
 
-        public Matrix<T, R> One
+        public override Matrix<T, R> One
         {
             get
             {
@@ -25,7 +25,7 @@ namespace DiscreteMathCore
             }
         }
 
-        public Matrix<T, R> Zero
+        public override Matrix<T, R> Zero
         {
             get
             {
@@ -33,17 +33,17 @@ namespace DiscreteMathCore
             }
         }
 
-        public bool Equals(Matrix<T, R> a, Matrix<T, R> b)
+        public override bool Equals(Matrix<T, R> a, Matrix<T, R> b)
         {
             return a == b;
         }
 
-        public string GetTexString(Matrix<T, R> a)
+        public override string GetTexString(Matrix<T, R> a)
         {
             return a.TexString;
         }
 
-        public Matrix<T, R> Opposite(Matrix<T, R> a)
+        public override Matrix<T, R> Opposite(Matrix<T, R> a)
         {
             var _minusOne = this.FRing.Opposite(this.FRing.One);
             var _res = new Matrix<T, R>(a);
@@ -51,17 +51,20 @@ namespace DiscreteMathCore
             return _res;
         }
 
-        public Matrix<T, R> Prod(Matrix<T, R> a, Matrix<T, R> b)
+        public override Matrix<T, R> Prod(Matrix<T, R> a, Matrix<T, R> b)
         {
             return a * b;
         }
 
-        public Matrix<T, R> Reverse(Matrix<T, R> a)
+        public override Matrix<T, R> InnerReverse(Matrix<T, R> a)
         {
+            if (a.Equals(One))
+                return One;
+
             return a.Reverse;
         }
 
-        public Matrix<T, R> Sum(Matrix<T, R> a, Matrix<T, R> b)
+        public override Matrix<T, R> Sum(Matrix<T, R> a, Matrix<T, R> b)
         {
             return a + b;
         }
@@ -78,37 +81,14 @@ namespace DiscreteMathCore
             return _one;
         }
 
-        public Matrix<T, R> RightReverse(Matrix<T, R> a)
+        public override Matrix<T, R> RightReverse(Matrix<T, R> a)
         {
             throw new NotImplementedException();
         }
 
-        public Matrix<T, R> LeftReverse(Matrix<T, R> a)
+        public override Matrix<T, R> LeftReverse(Matrix<T, R> a)
         {
             throw new NotImplementedException();
-        }
-
-        public Matrix<T, R> CreateVandermond(Dictionary<T, T> aArgValues)
-        {
-            var _rowCount = aArgValues.Count;
-            var _colCount = _rowCount + 1;
-            var _length = _rowCount * _colCount;
-            var _matrix = new Matrix<T, R>(this.FRing, _rowCount, _colCount);
-            var _count = 0;
-            var _values = new T[_rowCount, _colCount];
-            foreach (var _pair in aArgValues)
-            {
-                var p = this.FRing.One;
-                for (int i = 0; i < _rowCount; i++)
-                {
-                    _values[_count, i] = p;
-                    p = this.FRing.Prod(p, _pair.Key);
-                }
-                _values[_count,  _colCount - 1] = _pair.Value;
-                _count++;
-            }
-
-            return _matrix;
         }
 
         public Matrix<T, R> SolveLs(Matrix<T, R> aMatrix, T[] aValues)
@@ -116,7 +96,7 @@ namespace DiscreteMathCore
             return null; 
         }
 
-        public bool IsNaN(Matrix<T, R> a)
+        public override bool IsNaN(Matrix<T, R> a)
         {
             return false;
         }

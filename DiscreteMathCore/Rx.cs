@@ -6,7 +6,7 @@ using System.Threading.Tasks;
 
 namespace DiscreteMathCore
 {
-    public class Rx<T, R> : IRing<Polynom<T, R>> where R : IRing<T>
+    public class Rx<T, R> : RingBase<Polynom<T, R>> where R : RingBase<T>
     {
         private R FRing;
 
@@ -15,7 +15,7 @@ namespace DiscreteMathCore
             this.FRing = aRing;
         }
 
-        public Polynom<T, R> One
+        public override Polynom<T, R> One
         {
             get
             {
@@ -23,7 +23,7 @@ namespace DiscreteMathCore
             }
         }
 
-        public Polynom<T, R> Zero
+        public override Polynom<T, R> Zero
         {
             get
             {
@@ -31,37 +31,40 @@ namespace DiscreteMathCore
             }
         }
 
-        public bool Equals(Polynom<T, R> a, Polynom<T, R> b)
+        public override bool Equals(Polynom<T, R> a, Polynom<T, R> b)
         {
             return a == b;
         }
 
-        public string GetTexString(Polynom<T, R> a)
+        public override string GetTexString(Polynom<T, R> a)
         {
             return String.Format("[{0}]", a.TexString());
         }
 
-        public Polynom<T, R> Opposite(Polynom<T, R> a)
+        public override Polynom<T, R> Opposite(Polynom<T, R> a)
         {
             return -a;
         }
 
-        public Polynom<T, R> Prod(Polynom<T, R> a, Polynom<T, R> b)
+        public override Polynom<T, R> Prod(Polynom<T, R> a, Polynom<T, R> b)
         {
             return a * b;
         }
 
-        public Polynom<T, R> Reverse(Polynom<T, R> a)
+        public override Polynom<T, R> InnerReverse(Polynom<T, R> a)
         {
             if (a.Degree != 0)
                 throw new DivideByZeroException(
                     String.Format("The polynom {0} isn't invertible on the ring {1}.", a, this));
 
+            if (a.Equals(One))
+                return One;
+
             var _reverse = this.FRing.Reverse(a.GetValue(this.FRing.Zero));
             return new Polynom<T, R>(this.FRing, new T[] { _reverse });
         }
 
-        public Polynom<T, R> Sum(Polynom<T, R> a, Polynom<T, R> b)
+        public override Polynom<T, R> Sum(Polynom<T, R> a, Polynom<T, R> b)
         {
             return a + b;
         }
@@ -76,7 +79,7 @@ namespace DiscreteMathCore
             return new Polynom<T, R>(this.FRing, new T[] { aVal });
         }
 
-        public Polynom<T, R> RightReverse(Polynom<T, R> a)
+        public override Polynom<T, R> RightReverse(Polynom<T, R> a)
         {
 
             if (a.Degree != 0)
@@ -88,7 +91,7 @@ namespace DiscreteMathCore
         }
 
 
-        public Polynom<T, R> LeftReverse(Polynom<T, R> a)
+        public override Polynom<T, R> LeftReverse(Polynom<T, R> a)
         {
 
             if (a.Degree != 0)
@@ -99,7 +102,7 @@ namespace DiscreteMathCore
             return new Polynom<T, R>(this.FRing, new T[] { _reverse });
         }
 
-        public bool IsNaN(Polynom<T, R> a)
+        public override bool IsNaN(Polynom<T, R> a)
         {
             return false;
         }

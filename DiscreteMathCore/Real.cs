@@ -6,9 +6,9 @@ using System.Threading.Tasks;
 
 namespace DiscreteMathCore
 {
-    public class Real : IRing<double>
+    public class Real : RingBase<double>
     {
-        public double One
+        public override double One
         {
             get
             {
@@ -16,7 +16,7 @@ namespace DiscreteMathCore
             }
         }
 
-        public double Zero
+        public override double Zero
         {
             get
             {
@@ -27,52 +27,52 @@ namespace DiscreteMathCore
         //private int Digits = 8;
         private double Epsilon = 0.00000000000001;
 
-        public bool Equals(double a, double b)
+        public override bool Equals(double a, double b)
         {
             return Math.Abs(a - b) <= Epsilon;
         }
 
-        public string GetTexString(double a)
+        public override string GetTexString(double a)
         {
             return a.ToString();
         }
 
-        public bool IsNaN(double a)
+        public override bool IsNaN(double a)
         {
             return Double.IsNaN(a);
         }
 
-        public double LeftReverse(double a)
+        public override double LeftReverse(double a)
         {
             //return Math.Round(1 / a, Digits);
             return 1 / a;
         }
 
-        public double Opposite(double a)
+        public override double Opposite(double a)
         {
             return -a;
         }
 
-        public double Prod(double a, double b)
+        public override double Prod(double a, double b)
         {
             //return Math.Round(a * b, Digits);
 
             return a * b;
         }
 
-        public double Reverse(double a)
+        public override double InnerReverse(double a)
         {
             //return Math.Round(1 / a, Digits);
             return 1 / a;
         }
 
-        public double RightReverse(double a)
+        public override double RightReverse(double a)
         {
             //return Math.Round(1 / a, Digits);
             return 1 / a;
         }
 
-        public double Sum(double a, double b)
+        public override double Sum(double a, double b)
         {
             //return Math.Round(a + b, Digits);
             return a + b;

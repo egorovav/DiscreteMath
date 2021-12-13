@@ -10,7 +10,6 @@ namespace DiscreteMathCore
     {
         private static long MaxMult;
         private static long MaxSum;
-        private static long Shift;
 
         private long FNumerator;
         private long FDenumerator;
@@ -19,7 +18,6 @@ namespace DiscreteMathCore
         {
             MaxMult = (long)Math.Sqrt(Int64.MaxValue);
             MaxSum = (long)Math.Sqrt(Int64.MaxValue / 2);
-            Shift = 1L << 52;
         }
 
         public Q(long aNumerator)
@@ -218,9 +216,9 @@ namespace DiscreteMathCore
         }
     }
 
-    public class Rational : IRing<Q>
+    public class Rational : RingBase<Q>
     {
-        public Q One
+        public override Q One
         {
             get
             {
@@ -228,7 +226,7 @@ namespace DiscreteMathCore
             }
         }
 
-        public Q Zero
+        public override Q Zero
         {
             get
             {
@@ -236,17 +234,17 @@ namespace DiscreteMathCore
             }
         }
 
-        public Q Opposite(Q a)
+        public override Q Opposite(Q a)
         {
             return -a;
         }
 
-        public Q Prod(Q a, Q b)
+        public override Q Prod(Q a, Q b)
         {
             return a * b;
         }
 
-        public Q Reverse(Q a)
+        public override Q InnerReverse(Q a)
         {
             if (a == 0)
                 throw new DivideByZeroException();
@@ -254,17 +252,17 @@ namespace DiscreteMathCore
             return 1 / a;
         }
 
-        public Q Sum(Q a, Q b)
+        public override Q Sum(Q a, Q b)
         {
             return a + b;
         }
 
-        public bool Equals(Q a, Q b)
+        public override bool Equals(Q a, Q b)
         {
             return a == b;
         }
 
-        public string GetTexString(Q a)
+        public override string GetTexString(Q a)
         {
             return a.TexString;
         }
@@ -274,19 +272,24 @@ namespace DiscreteMathCore
             return "Rational numbers";
         }
 
-        public Q RightReverse(Q a)
+        public override Q RightReverse(Q a)
         {
             return this.Reverse(a);
         }
 
-        public Q LeftReverse(Q a)
+        public override Q LeftReverse(Q a)
         {
             return this.Reverse(a);
         }
 
-        public bool IsNaN(Q a)
+        public override bool IsNaN(Q a)
         {
             return false;
+        }
+
+        public override bool IsField
+        {
+            get { return true; }
         }
     }
 }

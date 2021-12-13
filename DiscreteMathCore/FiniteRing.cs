@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -6,14 +7,15 @@ using System.Threading.Tasks;
 
 namespace DiscreteMathCore
 {
-    public class FiniteRing : IRing<long>
+    public class FiniteRing : RingBase<long>, IEnumerable<long>
     {
         private long[,] FAddTable;
         private long[,] FMultTable;
+        private List<long> FValues = new List<long>();
 
-        public int Size
+        public override long Size
         {
-            get { return this.FAddTable.GetLength(0); }
+            get { return this.FValues.Count; }
         }
 
         public Matrix<long, ZnRing> AddTable
@@ -40,6 +42,15 @@ namespace DiscreteMathCore
 
             this.FAddTable = aAddOpp;
             this.FMultTable = aMultOpp;
+
+            for (var i = 0; i < _size; ++i)
+                this.FValues.Add(i);
+        }
+
+        public FiniteRing(long[,] aAddOpp, long[,] aMultOpp, long aSimpleSubfieldSize)
+            : this(aAddOpp, aMultOpp)
+        {
+            this.FSimpleSubfieldSize = aSimpleSubfieldSize;
         }
 
         private bool CheckZeroB()
@@ -281,7 +292,28 @@ namespace DiscreteMathCore
             return null;
         }
 
-        public long One
+        public string CheckField()
+        {
+            var _res = CheckRing();
+            if (_res != null)
+                return _res;
+
+            _res = CheckMultCom();
+            if (_res != null)
+                return _res;
+
+            _res = CheckOne();
+            if (_res != null)
+                return _res;
+
+            _res = CheckReverse();
+            if (_res != null)
+                return _res;
+
+            return null;
+        }
+
+        public override long One
         {
             get
             {
@@ -289,7 +321,7 @@ namespace DiscreteMathCore
             }
         }
 
-        public long Zero
+        public override long Zero
         {
             get
             {
@@ -297,22 +329,22 @@ namespace DiscreteMathCore
             }
         }
 
-        public bool Equals(long a, long b)
+        public override bool Equals(long a, long b)
         {
             return a == b;
         }
 
-        public string GetTexString(long a)
+        public override string GetTexString(long a)
+        {
+            return a.ToString();
+        }
+
+        public override bool IsNaN(long a)
         {
             throw new NotImplementedException();
         }
 
-        public bool IsNaN(long a)
-        {
-            throw new NotImplementedException();
-        }
-
-        public long LeftReverse(long a)
+        public override long LeftReverse(long a)
         {
             for (var i = 1; i < this.Size; ++i)
             {
@@ -323,7 +355,7 @@ namespace DiscreteMathCore
             return -1;
         }
 
-        public long Opposite(long a)
+        public override long Opposite(long a)
         {
             for(var i = 0; i < this.Size; ++i)
             {
@@ -334,12 +366,12 @@ namespace DiscreteMathCore
             return -1;
         }
 
-        public long Prod(long a, long b)
+        public override long Prod(long a, long b)
         {
             return this.FMultTable[a, b];
         }
 
-        public long Reverse(long a)
+        public override long InnerReverse(long a)
         {
             for (var i = 1; i < this.Size; ++i)
             {
@@ -350,7 +382,7 @@ namespace DiscreteMathCore
             return -1;
         }
 
-        public long RightReverse(long a)
+        public override long RightReverse(long a)
         {
             for (var i = 1; i < this.Size; ++i)
             {
@@ -361,9 +393,60 @@ namespace DiscreteMathCore
             return -1;
         }
 
-        public long Sum(long a, long b)
+        public override long Sum(long a, long b)
         {
             return this.FAddTable[a, b];
+        }
+
+        private long FSimpleSubfieldSize = 0;
+        public override long SimpleSubfieldSize
+        {
+            get { return this.FSimpleSubfieldSize; }
+        }
+
+        public IEnumerator<long> GetEnumerator()
+        {
+            return this.FValues.GetEnumerator();
+        }
+
+        IEnumerator IEnumerable.GetEnumerator()
+        {
+            return this.FValues.GetEnumerator();
+        }
+
+        public override string ToString()
+        {
+            var _sb = new StringBuilder();
+
+            _sb.AppendLine(this.AddTable.ToString());
+            _sb.AppendLine();
+            _sb.AppendLine(this.MultTable.ToString());
+
+            return _sb.ToString();
+        }
+
+        public static FiniteRing GF4
+        {
+            get
+            {
+                var _add = new long[,]
+                {
+                    { 0, 1, 2, 3 },
+                    { 1, 0, 3, 2 },
+                    { 2, 3, 0, 1 },
+                    { 3, 2, 1, 0 }
+                };
+
+                var _mult = new long[,]
+                {
+                    { 0, 0, 0, 0 },
+                    { 0, 1, 2, 3 },
+                    { 0, 2, 3, 1 },
+                    { 0, 3, 1, 2 }
+                };
+
+                return new FiniteRing(_add, _mult);
+            }
         }
     }
 }

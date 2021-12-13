@@ -35,7 +35,7 @@ namespace DiscreteMathCore
             return r1;
         }
 
-        public static Polynom<T, R> GetGcd<T, R>(Polynom<T, R> a, Polynom<T, R> b) where R : IRing<T>
+        public static Polynom<T, R> GetGcd<T, R>(Polynom<T, R> a, Polynom<T, R> b) where R : RingBase<T>
         {
             var temp = new List<Polynom<T, R>>();
             var r1 = a;
