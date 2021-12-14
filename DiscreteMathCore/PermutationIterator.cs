@@ -73,11 +73,7 @@ namespace DiscreteMathCore
 
         public void Reset()
         {
-            if(this.FInnerEnumerator != null)
-            {
-                this.FInnerEnumerator.Reset();
-            }
-
+            this.FInnerEnumerator.Reset();
             this.FPosition = 0;
         }
     }

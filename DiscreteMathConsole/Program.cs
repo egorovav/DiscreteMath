@@ -17,15 +17,16 @@ namespace DiscreteMathConsole
         const string _dllPath =@"\..\..\..\Debug\DiscreteMathAlgorithms.dll";
         static void Main(string[] args)
         {
-            // int[] _inputData = new int[] { 3, 3, 7, 7 };
+             int[] _inputData = new int[] { 3, 3, 7, 7 };
             //int[] _inputData = new int[] { 1, 3, 4, 5 };
             // int[] _inputData = new int[] { 6, 8, 8, 9 };
-             int[] _inputData = new int[] { 1, 5, 5, 5 };
+            // int[] _inputData = new int[] { 1, 5, 5, 5 };
             // int[] _inputData = new int[] { 1, 3, 4, 6 };
             //int[] _inputData = new int[] { 2, 3, 6, 6 };
             //int[] _inputData = new int[] { 1, 4, 5, 6 };
             ResultCalculator _resultCalculator = new ResultCalculator(_inputData, 24);
             _resultCalculator.calculate();
+            Console.WriteLine(_resultCalculator.ResultExpressions);
 
 
             Console.WriteLine();
