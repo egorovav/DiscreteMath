@@ -19,6 +19,8 @@ namespace Approximation
             this.FFunctions.Add("Exp(x)", Math.Exp);
             this.FFunctions.Add("Sqrt(x)", Math.Sqrt);
             this.FFunctions.Add("Sqr(x)", new Func<double, double>(x => Math.Pow(x, 2)));
+            this.FFunctions.Add("Circle R=1", new Func<double, double>(x => Math.Sqrt(1 - x * x)));
+            this.FFunctions.Add("x/ln(x)", new Func<double, double>(x => x / Math.Log(x)));
 
             this.FApproximator = new Approximator(this.FFunctions.Values.First());
         }

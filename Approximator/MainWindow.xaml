@@ -18,7 +18,7 @@
         </Grid.RowDefinitions>
         <Menu></Menu>
         <StackPanel Orientation="Horizontal" Grid.Row="1">
-            <ComboBox x:Name="cbFunctions" SelectedIndex="0" SelectedValue="{Binding SelectedFunction}"></ComboBox>
+            <ComboBox x:Name="cbFunctions" Width="120" SelectedIndex="0" SelectedValue="{Binding SelectedFunction}"></ComboBox>
             <Label Content="From:"></Label>
             <TextBox x:Name="tbFrom" Width="40" Text="{Binding From}"></TextBox>
             <Label Content="to:"></Label>

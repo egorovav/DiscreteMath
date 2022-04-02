@@ -17,17 +17,26 @@ namespace DiscreteMathConsole
         const string _dllPath =@"\..\..\..\Debug\DiscreteMathAlgorithms.dll";
         static void Main(string[] args)
         {
-             int[] _inputData = new int[] { 3, 3, 7, 7 };
+            //int[] _inputData = new int[] { 3, 3, 7, 7 };
             //int[] _inputData = new int[] { 1, 3, 4, 5 };
             // int[] _inputData = new int[] { 6, 8, 8, 9 };
             // int[] _inputData = new int[] { 1, 5, 5, 5 };
             // int[] _inputData = new int[] { 1, 3, 4, 6 };
             //int[] _inputData = new int[] { 2, 3, 6, 6 };
             //int[] _inputData = new int[] { 1, 4, 5, 6 };
-            ResultCalculator _resultCalculator = new ResultCalculator(_inputData, 24);
-            _resultCalculator.calculate();
-            Console.WriteLine(_resultCalculator.ResultExpressions);
+            //ResultCalculator _resultCalculator = new ResultCalculator(_inputData, 24);
+            //_resultCalculator.calculate();
+            //Console.WriteLine(_resultCalculator.ResultExpressions);
 
+            // HilbertMatrixQTest(6);
+
+            //Console.WriteLine(new Tuple<int, int>(1, 1).Equals(new Tuple<int, int>(1, 1)));
+
+            //numbersIterator(3, 4);
+
+            //wordsIteratorTest();
+
+            numbersIteratorTest();
 
             Console.WriteLine();
 
@@ -47,6 +56,36 @@ namespace DiscreteMathConsole
 
             //foreach (var _pol in _pfring)
             //    Console.WriteLine(_pol);
+        }
+
+        private static void quotiendFieldTest()
+        {
+            QuotientField<long> qf = new QuotientField<long>(new ZnRing(5));
+
+            // Console.WriteLine(qf.Prod(new Tuple<long, long>(1, 1), new Tuple<long, long>(1, 2)));
+
+            foreach (Tuple<long, long> item1 in qf.GetItems())
+            {
+                // Console.Write("({0},{1}) ", item1.Item1, item1.Item2);
+                foreach (Tuple<long, long> item2 in qf.GetItems())
+                {
+                    Tuple<long, long> prod = qf.Prod(item1, item2);
+                    Console.Write(prod);
+                }
+                Console.WriteLine();
+            }
+
+            ZnRing r = new ZnRing(5);
+            foreach (long item1 in r)
+            {
+                // Console.Write("({0},{1}) ", item1.Item1, item1.Item2);
+                foreach (long item2 in r)
+                {
+                    long prod = r.Prod(item1, item2);
+                    Console.Write("{0} ", prod);
+                }
+                Console.WriteLine();
+            }
         }
 
         private static void FactorisationTest1()
@@ -392,6 +431,187 @@ namespace DiscreteMathConsole
 
         //    return _res;
         //}
+
+        private static void testCheckField()
+        {
+            long[,] addOp = {
+                { 0, 1, 2, 3, 4},
+                { 1, 2, 3, 4, 0},
+                { 2, 3, 4, 0, 1},
+                { 3, 4, 0, 1, 2},
+                { 4, 0, 1, 2, 3}
+            };
+
+            long[,] multOp = {
+                { 0, 0, 0, 0, 0},
+                { 0, 1, 2, 3, 4},
+                { 0, 2, 4, 1, 3},
+                { 0, 3, 1, 4, 2},
+                { 0, 4, 3, 2, 1}
+            };
+
+            FiniteRing finitRing = new FiniteRing(addOp, multOp);
+            String result = finitRing.CheckField();
+            if(result == null)
+            {
+                System.Console.WriteLine("Ring is Field!");
+            } 
+            System.Console.WriteLine(result);
+        }
+
+        private static void findField()
+        {
+            int size = 5;
+            long[,] addOp = new long[size, size];
+            long[,] multOp = new long[size, size];
+
+            for(int i = 0; i < size; i++)
+            {
+                for(int j = 0; j < size; j++)
+                {
+                    for(int res = 0; res < size; res++) 
+                    {
+                        for (int i1 = 0; i1 < size; i1++)
+                        {
+                            for (int j1 = 0; j1 < size; j1++)
+                            {
+                                for (int res1 = 0; res1 < size; res1++)
+                                {
+                                    addOp[i, j] = res;
+                                    multOp[i1, j1] = res1;
+
+                                    FiniteRing finitRing = new FiniteRing(addOp, multOp);
+                                    if(finitRing.CheckField() == null)
+                                    {
+                                        System.Console.WriteLine(addOp);
+                                        System.Console.WriteLine(multOp);
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        }
+
+        static void HilbertMatrixTest(int _size)
+        {
+            double[,] _values = new double[_size, _size];
+            for(int i = 0; i < _size; i++)
+            {
+                for(int j = 0; j < _size; j++)
+                {
+                    _values[i, j] = 1 / (i + j + 1.0);
+                }
+            }
+
+            Real R = new Real();
+
+            Matrix<Double, Real> m = new Matrix<double, Real>(R, _values);
+            Matrix<Double, Real> r = m.Reverse;
+            double _sum = 0;
+
+            for (int i = 0; i < _size; i++)
+            {
+                for (int j = 0; j < _size; j++)
+                {
+                    Console.Write(r.Values[i, j]);
+                    Console.Write(" ");
+                    _sum += r.Values[i, j];
+                }
+                Console.WriteLine();
+            }
+
+            Console.WriteLine(_sum);
+        }
+
+        static void HilbertMatrixQTest(int _size)
+        {
+            Q[,] _values = new Q[_size, _size];
+            for (int i = 0; i < _size; i++)
+            {
+                for (int j = 0; j < _size; j++)
+                {
+                    _values[i, j] = new Q(1, i + j + 1);
+                }
+            }
+
+            Rational R = new Rational();
+
+            Matrix<Q, Rational> m = new Matrix<Q, Rational>(R, _values);
+            Matrix<Q, Rational> r = m.Reverse;
+            Q _sum = 0;
+
+            for (int i = 0; i < _size; i++)
+            {
+                for (int j = 0; j < _size; j++)
+                {
+                    Console.Write(r.Values[i, j]);
+                    Console.Write("\t");
+                    _sum += r.Values[i, j];
+                }
+                Console.WriteLine();
+            }
+
+            Console.WriteLine(_sum);
+        }
+
+        private static void numbersIterator(int radix, int length)
+        { 
+            int[] number = new int[length + 1];
+
+            int cnt = 1;
+
+            while(number[0] != 1)
+            {
+                Console.Write(cnt + "\t");
+                for (int i = 1; i < length + 1; i++)
+                {
+                    Console.Write(number[i] + ", ");
+                }
+                Console.WriteLine();
+
+                for (int i = length; i >= 0; i--)
+                {
+                    if(number[i] == radix - 1)
+                    {
+                        number[i] = 0;
+                    }
+                    else
+                    {
+                        number[i]++;
+                        break;
+                    }
+                }
+                cnt++;
+            }
+
+        }
+
+        private static void wordsIteratorTest()
+        {
+            char[] alphabet = { 'a', 'b', 'c' };
+            WordsIterator<char> wordsIterator = new WordsIterator<char>(alphabet, 5);
+            int count = 1;
+            while(wordsIterator.MoveNext())
+            {
+                String word = String.Join("", wordsIterator.Current);
+                Console.WriteLine(count + "\t" + word);
+                count++;
+            }
+        }
+
+        private static void numbersIteratorTest()
+        {
+            NumbersIterator numbersIterator = new NumbersIterator(3, 5);
+            int count = 1;
+            while (numbersIterator.MoveNext())
+            {
+                String word = String.Join("", numbersIterator.Current);
+                Console.WriteLine(count + "\t" + word);
+                count++;
+            }
+        }
 
         [DllImport(_dllPath)]
         static extern int get_gcd(int a, int b);
