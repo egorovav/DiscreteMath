@@ -17,26 +17,30 @@ namespace DiscreteMathConsole
         const string _dllPath =@"\..\..\..\Debug\DiscreteMathAlgorithms.dll";
         static void Main(string[] args)
         {
-            //int[] _inputData = new int[] { 3, 3, 7, 7 };
-            //int[] _inputData = new int[] { 1, 3, 4, 5 };
-            // int[] _inputData = new int[] { 6, 8, 8, 9 };
-            // int[] _inputData = new int[] { 1, 5, 5, 5 };
-            // int[] _inputData = new int[] { 1, 3, 4, 6 };
-            //int[] _inputData = new int[] { 2, 3, 6, 6 };
-            //int[] _inputData = new int[] { 1, 4, 5, 6 };
-            //ResultCalculator _resultCalculator = new ResultCalculator(_inputData, 24);
-            //_resultCalculator.calculate();
-            //Console.WriteLine(_resultCalculator.ResultExpressions);
 
-            // HilbertMatrixQTest(6);
+            QextendedByNsqrt qext = new QextendedByNsqrt(5);
+            Qext phi = qext.getVal(new Q(1, 2), new Q(1, 2));
+            Console.WriteLine(phi);
+            Console.WriteLine(phi.TexString);
 
-            //Console.WriteLine(new Tuple<int, int>(1, 1).Equals(new Tuple<int, int>(1, 1)));
+            Qext phi_ = qext.getVal(new Q(1, 2), new Q(-1, 2));
+            Console.WriteLine(phi_);
+            Console.WriteLine(phi_.TexString);
 
-            //numbersIterator(3, 4);
+            Qext phin = phi;
+            Qext phi_n = phi_;
+            Qext m = qext.getVal(0, new Q(1, 5));
 
-            //wordsIteratorTest();
+            for(int i = 0; i < 30; i++)
+            {
+                Qext _f = m * (phin - phi_n); 
+                Console.WriteLine(_f);
 
-            numbersIteratorTest();
+                phin *= phi;
+                phi_n *= phi_;
+
+                //Console.WriteLine(phi_n);
+            }
 
             Console.WriteLine();
 

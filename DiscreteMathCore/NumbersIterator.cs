@@ -35,7 +35,7 @@ namespace DiscreteMathCore
 
         public bool MoveNext()
         {
-            if (this.current == null)
+            if (this.current == null) 
             {
                 this.current = new int[this.numberLength + 1].ToList();
                 return true;

@@ -76,6 +76,11 @@ namespace DiscreteMathCore
             return new Q(_numerator, _denumerator);
         }
 
+        public static Q operator *(Q q1, int m) 
+        {
+            return new Q(q1.FNumerator * m, q1.FDenumerator);
+        }
+
         public static Q operator /(Q q1, Q q2)
         {
             if (q1 == null || q2 == null)
@@ -153,6 +158,12 @@ namespace DiscreteMathCore
         public static bool operator !=(Q a, Q b)
         {
             return !(a == b);
+        }
+
+
+        public static implicit operator Q(int x)
+        {
+            return new Q(x);
         }
 
         public override bool Equals(object obj)

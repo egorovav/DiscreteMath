@@ -51,6 +51,7 @@
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="PxFx.cs" />
     <Compile Include="Q.cs" />
+    <Compile Include="QextendedByNsqrt.cs" />
     <Compile Include="QuotientField.cs" />
     <Compile Include="Real.cs" />
     <Compile Include="Rx.cs" />
